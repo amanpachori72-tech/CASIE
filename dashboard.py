@@ -81,4 +81,5 @@ else:
 st.markdown("---")
 
 # Assign standard script runtime execution tracking variable
-target_path = st.
+# Assign standard script runtime execution tracking variable
+target_path = st.session_state.target_path
