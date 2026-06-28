@@ -1,7 +1,11 @@
 import streamlit as st
 import networkx as nx
 import os
+import shutil
+import zipfile
+import subprocess
 import matplotlib.pyplot as plt
+
 # Import logic from your other core files
 from app import extract_code_structures, CodeEmbeddingEngine, build_repository_graph
 from analytics import identify_architectural_bottlenecks
@@ -14,115 +18,67 @@ st.write("Topological Graph Analysis & AI-Driven Refactoring Pipeline")
 
 st.markdown("---")
 
-# 2. Interactive Input Controls (Rendered Instantly so the page never looks empty)
-target_path = st.text_input("Enter local repository directory path to analyze:", value="./test_repo")
-analyze_button = st.button("Run Global Structural Analysis")
+# 2. Unified Ingestion Layer (Supports Remote GitHub Links & Local Zip Uploads)
+st.subheader("📁 Provide Codebase for Analysis")
 
-# 3. Deferred Heavy Model Initialization (Wrapped in a loading layer)
-if "embed_engine" not in st.session_state:
-    with st.spinner("Initializing Deep Learning Core... Loading CodeBERT semantic layers from Hugging Face (This may take 2-3 minutes on the first run)..."):
-        st.session_state.embed_engine = CodeEmbeddingEngine()
-    st.success("🤖 CodeBERT Semantic Engine loaded successfully and cached in memory!")
+upload_method = st.radio(
+    "Choose how you want to provide the source code:",
+    ["GitHub Repository URL", "Upload Local Project Folder (.zip)"],
+    horizontal=True
+)
 
-# 4. Global Analysis Execution Workflow
-if analyze_button:
-    if os.path.exists(target_path):
-        with st.spinner("Processing repository topology... Compiling static structures & generating mathematical graph tensors..."):
+# Initialize container variables in session state to handle page refreshes correctly
+if "target_path" not in st.session_state:
+    st.session_state.target_path = None
+if "processing_ready" not in st.session_state:
+    st.session_state.processing_ready = False
+
+if upload_method == "GitHub Repository URL":
+    repo_url = st.text_input(
+        "Enter public GitHub Repository URL:", 
+        placeholder="https://github.com/username/repository"
+    )
+    if repo_url:
+        st.session_state.target_path = "./cloned_user_repo"
+        if st.button("Download and Prepare Repository", use_container_width=True):
+            if os.path.exists(st.session_state.target_path):
+                shutil.rmtree(st.session_state.target_path)
             
-            # Step 1: Parse Directory Files
-            all_structures = []
-            for root, _, files in os.walk(target_path):
-                for file in files:
-                    if file.endswith(".py"):
-                        structures = extract_code_structures(os.path.join(root, file), language="python")
-                        # Add raw code block lookup references for the LLM step
-                        all_structures.extend(structures)
-            
-            if not all_structures:
-                st.error(f"Analysis halted: No valid Python code components extracted from path '{target_path}'. Check if the folder contains active .py files.")
-            else:
-                # Step 2 & 3: Compile Graph Network using cached model engine
-                G = build_repository_graph(all_structures, st.session_state.embed_engine)
-                
-                # Step 4: Programmatic Bottleneck Filtering
-                bottlenecks = identify_architectural_bottlenecks(G, top_n=2)
-                
-                # Render Metrics Dashboard Layout
-                st.subheader("📊 Structural Topological Metrics")
-                col1, col2 = st.columns(2)
-                col1.metric("Total Extracted Components (Nodes)", G.number_of_nodes())
-                col2.metric("Topological Dependencies (Edges)", G.number_of_edges())
-                
-                # --- VISUAL NETWORK GRAPH RENDERING LAYER ---
-                st.markdown("---")
-                st.subheader("🌐 Codebase Topological Network Map")
-                
-                # Create a fresh matplotlib figure object to prevent state bleeding
-                fig, ax = plt.subplots(figsize=(8, 4))
-                fig.patch.set_facecolor('#0e1117')  # Match Streamlit's dark theme background
-                ax.set_facecolor('#0e1117')
-                
-                # Compute visual spring layout node coordinates
-                pos = nx.spring_layout(G, seed=42)
-                
-                # Draw the network structural layers
-                nx.draw_networkx_nodes(G, pos, ax=ax, node_color='#ff4b4b', node_size=500)
-                nx.draw_networkx_edges(G, pos, ax=ax, edge_color='#ffffff', arrows=True, arrowsize=15)
-                nx.draw_networkx_labels(G, pos, ax=ax, font_color='#ffffff', font_size=10, font_weight='bold')
-                
-                plt.axis('off') # Clean layout border removal
-                st.pyplot(fig)  # Safely push the compiled matrix figure plot to the frontend
-                # -------------------------------------------------
-                
-                st.markdown("---")
-                st.subheader("⚠️ Top Architectural Bottlenecks Isolated via Betweenness Centrality")
-                
-                if not bottlenecks:
-                    st.info("No major architectural outliers isolated in this codebase layout.")
-                    full_report_text = f"# CASIE: Code-Architecture Semantic Integrity Report\nNo critical anomalies found."
-                else:
-                    # Initialize the report compiler markdown buffer string
-                    full_report_text = f"""# CASIE: Code-Architecture Semantic Integrity Report
-                     
-**Target Directory Analyzed:** `{target_path}`
-**Total Extracted Components (Nodes):** {G.number_of_nodes()}
-**Topological Dependencies (Edges):** {G.number_of_edges()}
+            with st.spinner("Executing Git tracking layer... cloning source files from GitHub..."):
+                try:
+                    # Execute clone without creating sub-commit loops
+                    result = subprocess.run(
+                        ["git", "clone", repo_url, st.session_state.target_path], 
+                        check=True, capture_output=True
+                    )
+                    st.success("✨ Repository cloned successfully into cloud workspace sandbox!")
+                    st.session_state.processing_ready = True
+                except subprocess.CalledProcessError as e:
+                    st.error(f"Failed to clone repository. Ensure the URL is public. Error: {e.stderr.decode()}")
+                    st.session_state.target_path = None
+                    st.session_state.processing_ready = False
 
-=====================================================================
-"""
-                    # Step 5: Iterative LLM Generation per structural outlier
-                    for idx, item in enumerate(bottlenecks):
-                        st.markdown(f"### Anomaly {idx+1}: `{item['name']}` (Structural Impact Score: `{item['score']:.4f}`)")
-                        
-                        # Match graph entry back to code block array
-                        code_match = next((x["code"] for x in all_structures if x["name"] == item["name"]), "")
-                        
-                        with st.spinner(f"Querying generative architectural critique for {item['name']}..."):
-                            report = generate_architectural_critique(item["name"], item["score"], code_match)
-                            st.info(report)
-                            
-                            # Append the data directly to the markdown export string
-                            full_report_text += f"""
-## Anomaly {idx+1}: `{item['name']}`
-* **Structural Centrality Score:** {item['score']:.4f}
-* **Entity Type:** {item['type']}
-* **Declaration Line:** {item['line']}
+else:
+    uploaded_zip = st.file_uploader("Upload local project codebase compressed as a .zip file:", type=["zip"])
+    if uploaded_zip:
+        st.session_state.target_path = "./extracted_user_code"
+        if st.button("Extract and Prepare Files", use_container_width=True):
+            if os.path.exists(st.session_state.target_path):
+                shutil.rmtree(st.session_state.target_path)
+                
+            with st.spinner("Decompressing code architecture map structures..."):
+                try:
+                    os.makedirs(st.session_state.target_path, exist_ok=True)
+                    with zipfile.ZipFile(uploaded_zip, "r") as zip_ref:
+                        zip_ref.extractall(st.session_state.target_path)
+                    st.success("✨ Local codebase extracted successfully into cloud workspace sandbox!")
+                    st.session_state.processing_ready = True
+                except Exception as e:
+                    st.error(f"Failed to unzip archive layout. Error: {str(e)}")
+                    st.session_state.target_path = None
+                    st.session_state.processing_ready = False
 
-### Architectural Audit & Refactoring Blueprint:
-{report}
----------------------------------------------------------------------
-"""
-                
-                # Render the Actionable Export Button Layer
-                st.markdown("---")
-                st.subheader("💾 Export Architecture Audit")
-                
-                st.download_button(
-                    label="Download Full Architecture Report (.md)",
-                    data=full_report_text,
-                    file_name="casie_architecture_report.md",
-                    mime="text/markdown",
-                    use_container_width=True
-                )
-    else:
-        st.error(f"Provided path '{target_path}' does not exist. Please check the spelling or absolute path syntax.")
+st.markdown("---")
+
+# Assign standard script runtime execution tracking variable
+target_path = st.
