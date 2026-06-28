@@ -1,46 +1,59 @@
-# Code-Architecture Semantic Integrity Evaluator (CASIE)
+# Code-Architecture Semantic Integrity Evaluator (CASIE) 🚀
 
-An advanced, graph-driven architectural audit engine that maps codebase topologies, programmatically isolates structural bottlenecks using network centrality mathematics, and generates automated refactoring blueprints via large language models.
+[![Streamlit App](https://static.streamlit.io/badge_svg.svg)](https://share.streamlit.io/) [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
----
-
-## 🏗️ Core System Architecture
-
-CASIE decouples architectural evaluation from standard static analysis metrics by mapping code relationships into a multidimensional topological graph:
-
-1. **AST Syntactic Parsing:** Utilizes `tree-sitter` to parse multi-language source files into concrete abstract syntax trees, identifying core entities (functions/classes) and call-graph dependencies.
-2. **Semantic Code Embeddings:** Converts raw code snippets into dense 768-dimensional vector tensors using a deep-learning `CodeBERT` layer to track structural intent.
-3. **Directed Graph Compilation:** Assembles code units into a mathematical network graph using `NetworkX` (Nodes = Code Entities, Edges = Execution Dependencies).
-4. **Topological Centrality Analytics:** Evaluates network traffic bottlenecks by programmatically computing **Betweenness Centrality** metrics to catch highly-coupled architectural anomalies.
-5. **Generative LLM Audit:** Passes structural bottleneck metrics and raw logic to the `Gemini-2.5-Flash` engine to compile automated refactoring blueprints.
+CASIE is an advanced static code analysis and machine learning pipeline that parses entire Python repositories, builds a high-fidelity topological dependency graph, and utilizes LLM semantic reasoning to isolate and generate refactoring blueprints for structural architectural bottlenecks.
 
 ---
 
-## 📊 Dashboard Visualizations & Capabilities
+## 🌟 Key Features
 
-* **Structural Metrics Grid:** Real-time extraction tracking of absolute repository Node and Edge totals.
-* **Topological Network Map:** Live visual mapping of codebase execution streams rendered directly through Matplotlib spring layouts.
-* **Automated Audit Exporter:** One-click compiling of metric graphs and AI critique blocks into downloadable local Markdown logs.
+- **Multi-Channel Ingestion:** Supports automated public GitHub repository cloning and local project folder `.zip` extractions directly through an isolated cloud sandbox.
+- **AST Parsing Engine:** Leverages `tree-sitter` to compile high-fidelity Abstract Syntax Trees (AST) and extract fine-grained code structural entities (classes, methods, dependencies).
+- **Semantic Code Embeddings:** Utilizes Hugging Face `CodeBERT` transformer layers to project semantic code characteristics into vector space.
+- **Topological Network Mapping:** Construct global repository dependency networks using `NetworkX` and visualizes code coupling topologies using `Matplotlib`.
+- **AI-Driven Refactoring Blueprints:** Isolates critical code smells via Network Centrality Metrics (Betweenness Centrality) and triggers the Google Gemini Flash API to generate production-grade refactoring critiquing layers.
 
 ---
 
-## 🚀 Local Quickstart Setup
+## 🏗️ System Architecture & Data Flow
 
-### Prerequisites
-* Python 3.10 or higher
-* A valid Gemini API Key (Generated free at [Google AI Studio](https://aistudio.google.com/))
+The platform executes code ingestion, graph tensor compilation, and semantic audit generation across 5 deterministic pipeline phases:
 
-### 1. Environment Installation
-Clone the repository to your local directory machine and initialize your isolated virtual dependency tracking frame:
+[User Input: GitHub URL / ZIP]
+│
+▼
+[Sandboxed Ingestion Layer (Git/Zip)] ──> [Tree-Sitter AST Parsing]
+│
+▼
+[NetworkX Graph Matrix Creation] <─── [CodeBERT Semantic Vector Mapping]
+│
+▼
+[Betweenness Centrality Outlier Isolation]
+│
+▼
+[Google Gemini Gen-AI Evaluation Engine] ──> [Interactive Metrics UI & Markdown Audit Export] 
+
+---
+
+## 🛠️ Tech Stack & Core Dependencies
+
+- **Frontend/Dashboard:** Streamlit (Production Cloud Micro-container Container)
+- **Graph Engineering:** NetworkX, Matplotlib
+- **Machine Learning Core:** Hugging Face Transformers (`CodeBERT`), PyTorch (CPU-Optimized Runtime)
+- **Language Parsing Engine:** Tree-Sitter, Tree-Sitter-Languages
+- **Generative AI Core:** Google GenAI SDK (Gemini Core Configuration Framework)
+
+---
+
+## 🚀 Local Installation & Setup
+
+To spin up a local instance of CASIE on your computer, follow these configuration stages:
+
+### 1. Clone the Workspace & Initialize Environment
 ```bash
-# Clone the repository
-git clone [https://github.com/YOUR_USERNAME/CASIE.git](https://github.com/YOUR_USERNAME/CASIE.git)
+git clone [https://github.com/amanpachori72-tech/CASIE.git](https://github.com/amanpachori72-tech/CASIE.git)
 cd CASIE
-
-# Initialize and activate virtual environment
 python -m venv casie_env
-source casie_env/bin/activate  # On Linux/macOS
-.\casie_env\Scripts\activate   # On Windows PowerShell
-
-# Install required manifest packages
-pip install -r requirements.txt
+source casie_env/bin/activate  # On Windows use: casie_env\Scripts\activate
