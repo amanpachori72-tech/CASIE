@@ -1,6 +1,6 @@
 # Code-Architecture Semantic Integrity Evaluator (CASIE) 🚀
 
-[![Streamlit App](https://static.streamlit.io/badge_svg.svg)](https://share.streamlit.io/) [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
+[![Streamlit App](https://static.streamlit.io/badge_svg.svg)](h[ttps://share.streamlit.io/](https://4yevmvfwpmo5yrx9aqgnw5.streamlit.app/)) [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 CASIE is an advanced static code analysis and machine learning pipeline that parses entire Python repositories, builds a high-fidelity topological dependency graph, and utilizes LLM semantic reasoning to isolate and generate refactoring blueprints for structural architectural bottlenecks.
